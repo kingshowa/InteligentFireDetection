@@ -5,19 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb289260-61cb-4a21-85ae-e9f93d659943" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/InteligentFireDetection.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/communication/esp32_client.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/communication/pi_client.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/config/config.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/detection/fire_detector.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/logging/event_logger.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ui/dashboard.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/video_input/video_stream.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/detection/fire_detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/detection/fire_detector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ui/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/dashboard.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,8 +123,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.esp32_client" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.esp32_client" />
         <item itemvalue="Python.dashboard" />
       </list>
     </recent_temporary>

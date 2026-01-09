@@ -1,7 +1,6 @@
 import customtkinter as ctk
 from datetime import datetime
 from PIL import Image, ImageTk
-from ..communication.esp32_client import ESP32Client
 
 # -------------------------------------------------
 # UI CONFIG
@@ -15,12 +14,13 @@ class FireDetectionDashboard(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("🔥 Intelligent Fire Detection System")
+        self.title(" Intelligent Fire Detection System")
         self.geometry("1200x650")
         self.resizable(True, True)
 
         # Callbacks (set by main.py)
         self.on_start_stream = None
+        self.on_deactivate_buzzer = None
 
         # State
         self.alert_active = False
@@ -29,7 +29,7 @@ class FireDetectionDashboard(ctk.CTk):
         # Build UI
         self._build_main_layout()
 
-        # 🔥 DEFAULT: start camera automatically
+        #  DEFAULT: start camera automatically
         self.after(300, self._auto_start_camera)
 
     # -------------------------------------------------
@@ -155,7 +155,7 @@ class FireDetectionDashboard(ctk.CTk):
             text="Deactivate Buzzer",
             fg_color="darkred",
             hover_color="red",
-            command=self.deactivate_buzzer
+            command=self.deactivate_buzzer_clicked
         )
         self.deactivate_button.pack(fill="x", pady=5)
 
@@ -217,13 +217,14 @@ class FireDetectionDashboard(ctk.CTk):
 
     def fire_detected(self, confidence):
         self.alert_active = True
-        ESP32Client.send_fire_alert(confidence)
         self.alert_status_label.configure(text="Alert: FIRE DETECTED", text_color="red")
         self.log_event(f"Fire detected (confidence={confidence:.2f})")
 
-    def deactivate_buzzer(self):
+    def deactivate_buzzer_clicked(self):
+        if self.on_deactivate_buzzer:
+            self.on_deactivate_buzzer()
+
         self.alert_active = False
-        ESP32Client.deactivate_buzzer()
         self.alert_status_label.configure(text="Alert: INACTIVE", text_color="gray")
         self.log_event("Buzzer deactivated")
 

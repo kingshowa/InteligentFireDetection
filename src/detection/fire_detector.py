@@ -1,32 +1,44 @@
 import cv2
 import numpy as np
 import time
+from collections import deque
 
 
 class FireDetector:
     """
-    OpenCV-based fire detection with:
+    Robust fire detector with:
     - Color segmentation
     - Motion verification
-    - Temporal confirmation
+    - Shape analysis
+    - Temporal smoothing
+    - False-positive suppression
     """
 
     def __init__(self,
                  min_fire_duration=1.0,
                  min_fire_area=500,
+                 confidence_threshold=0.6,
+                 smoothing_window=10,
+                 persistence_ratio=0.7,
                  hsv_lower=(0, 120, 70),
                  hsv_upper=(35, 255, 255)):
 
         # Parameters
         self.min_fire_duration = min_fire_duration
         self.min_fire_area = min_fire_area
+        self.confidence_threshold = confidence_threshold
+        self.persistence_ratio = persistence_ratio
+
         self.hsv_lower = np.array(hsv_lower)
         self.hsv_upper = np.array(hsv_upper)
+
+        # Temporal buffers
+        self.confidence_buffer = deque(maxlen=smoothing_window)
+        self.fire_presence_buffer = deque(maxlen=smoothing_window)
 
         # State
         self.fire_start_time = None
         self.alert_sent = False
-        self.last_event = None
 
         # Motion detector
         self.bg_subtractor = cv2.createBackgroundSubtractorMOG2(
@@ -35,16 +47,10 @@ class FireDetector:
             detectShadows=True
         )
 
-    # ----------------------------
+    # -------------------------------------------------
     # MAIN PIPELINE
-    # ----------------------------
+    # -------------------------------------------------
     def process_frame(self, frame, timestamp):
-        """
-        Returns:
-        - fire_detected (bool)
-        - confidence (float)
-        - bounding_boxes (list)
-        """
 
         fire_mask = self._detect_fire_color(frame)
         motion_mask = self._detect_motion(frame)
@@ -52,31 +58,40 @@ class FireDetector:
         combined = cv2.bitwise_and(fire_mask, motion_mask)
         boxes, total_area = self._extract_regions(combined)
 
-        if total_area < self.min_fire_area:
+        raw_confidence = min(1.0, total_area / (self.min_fire_area * 3))
+        fire_present = total_area >= self.min_fire_area
+
+        # Update temporal buffers
+        self.confidence_buffer.append(raw_confidence)
+        self.fire_presence_buffer.append(1 if fire_present else 0)
+
+        smoothed_confidence = np.mean(self.confidence_buffer)
+        persistence = np.mean(self.fire_presence_buffer)
+
+        # Reset if fire disappears
+        if not fire_present:
             self.fire_start_time = None
-            return False, 0.0, []
+            self.alert_sent = False
+            return False, smoothed_confidence, []
 
-        confidence = min(1.0, total_area / (self.min_fire_area * 3))
+        # Temporal consistency
+        if not self._check_temporal_consistency(timestamp):
+            return False, smoothed_confidence, boxes
 
-        if self._check_temporal_consistency(timestamp):
-            if not self.alert_sent:
-                self.alert_sent = True
-                self.last_event = {
-                    "timestamp": timestamp,
-                    "confidence": confidence,
-                    "boxes": boxes
-                }
-            return True, confidence, boxes
+        # Final decision gate
+        if (persistence >= self.persistence_ratio and
+                smoothed_confidence >= self.confidence_threshold):
 
-        return False, confidence, boxes
+            return True, smoothed_confidence, boxes
 
-    # ----------------------------
+        return False, smoothed_confidence, boxes
+
+    # -------------------------------------------------
     # INTERNAL STAGES
-    # ----------------------------
+    # -------------------------------------------------
     def _detect_fire_color(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, self.hsv_lower, self.hsv_upper)
-        return mask
+        return cv2.inRange(hsv, self.hsv_lower, self.hsv_upper)
 
     def _detect_motion(self, frame):
         fg = self.bg_subtractor.apply(frame)
@@ -94,6 +109,13 @@ class FireDetector:
             if area < self.min_fire_area:
                 continue
 
+            # Shape filtering (false-positive suppression)
+            hull = cv2.convexHull(cnt)
+            solidity = area / (cv2.contourArea(hull) + 1e-5)
+
+            if solidity > 0.9:
+                continue  # Likely solid object, not fire
+
             x, y, w, h = cv2.boundingRect(cnt)
             boxes.append((x, y, w, h))
             total_area += area
@@ -107,10 +129,11 @@ class FireDetector:
 
         return (timestamp - self.fire_start_time) >= self.min_fire_duration
 
-    # ----------------------------
+    # -------------------------------------------------
     # RESET
-    # ----------------------------
+    # -------------------------------------------------
     def reset(self):
         self.fire_start_time = None
         self.alert_sent = False
-        self.last_event = None
+        self.confidence_buffer.clear()
+        self.fire_presence_buffer.clear()
