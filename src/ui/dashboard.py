@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from datetime import datetime
 from PIL import Image, ImageTk
 
 # -------------------------------------------------
@@ -10,33 +9,45 @@ ctk.set_default_color_theme("dark-blue")
 
 
 class FireDetectionDashboard(ctk.CTk):
+    """
+    UI layer only:
+    - Displays video
+    - Displays logs
+    - Emits user actions to controller
+    """
 
-    def __init__(self):
+    def __init__(self, event_logger=None):
         super().__init__()
 
-        self.title(" Intelligent Fire Detection System")
+        self.title("Intelligent Fire Detection System")
         self.geometry("1200x650")
         self.resizable(True, True)
 
-        # Callbacks (set by main.py)
+        # External dependencies
+        self.event_logger = event_logger
+
+        # Callbacks (wired in main.py)
         self.on_start_stream = None
         self.on_deactivate_buzzer = None
+        self.on_stop_system = None
 
-        # State
+        # UI state
         self.alert_active = False
         self.system_running = True
 
         # Build UI
         self._build_main_layout()
 
-        #  DEFAULT: start camera automatically
+        # Load previous logs
+        self.after(200, self._load_existing_logs)
+
+        # Auto-start camera
         self.after(300, self._auto_start_camera)
 
     # -------------------------------------------------
     # MAIN LAYOUT
     # -------------------------------------------------
     def _build_main_layout(self):
-
         header = ctk.CTkLabel(
             self,
             text="INTELLIGENT FIRE DETECTION SYSTEM",
@@ -57,7 +68,6 @@ class FireDetectionDashboard(ctk.CTk):
     # LEFT PANEL (VIDEO + INPUT)
     # -------------------------------------------------
     def _build_left_panel(self):
-
         self.left_panel = ctk.CTkFrame(self.main_container)
         self.left_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
 
@@ -104,14 +114,12 @@ class FireDetectionDashboard(ctk.CTk):
         )
         self.start_button.pack(pady=10)
 
-        # Initial UI state
         self._on_source_change("Camera")
 
     # -------------------------------------------------
     # RIGHT PANEL (STATUS + LOG + ACTIONS)
     # -------------------------------------------------
     def _build_right_panel(self):
-
         self.right_panel = ctk.CTkFrame(self.main_container)
         self.right_panel.grid(row=0, column=1, sticky="nsew")
 
@@ -155,7 +163,7 @@ class FireDetectionDashboard(ctk.CTk):
             text="Deactivate Buzzer",
             fg_color="darkred",
             hover_color="red",
-            command=self.deactivate_buzzer_clicked
+            command=self._deactivate_buzzer_clicked
         )
         self.deactivate_button.pack(fill="x", pady=5)
 
@@ -163,7 +171,7 @@ class FireDetectionDashboard(ctk.CTk):
             action_frame,
             text="Stop System",
             fg_color="gray",
-            command=self.stop_system
+            command=self._stop_system_clicked
         )
         self.stop_button.pack(fill="x", pady=5)
 
@@ -180,7 +188,6 @@ class FireDetectionDashboard(ctk.CTk):
 
     def _auto_start_camera(self):
         if self.on_start_stream:
-            self.log_event("🎥 Starting default camera stream")
             self.on_start_stream("Camera", "0")
 
     def _start_stream_clicked(self):
@@ -191,14 +198,12 @@ class FireDetectionDashboard(ctk.CTk):
         source_value = self.source_entry.get().strip()
 
         if not source_value:
-            self.log_event("⚠ Please provide a valid file path or URL")
             return
 
-        self.log_event(f"▶ Starting stream: {source_type}")
         self.on_start_stream(source_type, source_value)
 
     # -------------------------------------------------
-    # UI UPDATE METHODS
+    # DISPLAY METHODS (NO LOGIC)
     # -------------------------------------------------
     def update_video_frame(self, frame_bgr):
         frame_rgb = frame_bgr[:, :, ::-1]
@@ -208,8 +213,7 @@ class FireDetectionDashboard(ctk.CTk):
         self.video_label.configure(image=imgtk, text="")
         self.video_label.image = imgtk
 
-    def log_event(self, message):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    def display_log(self, timestamp, message):
         self.event_log.configure(state="normal")
         self.event_log.insert("end", f"[{timestamp}] {message}\n")
         self.event_log.see("end")
@@ -217,35 +221,50 @@ class FireDetectionDashboard(ctk.CTk):
 
     def fire_detected(self, confidence):
         self.alert_active = True
-        self.alert_status_label.configure(text="Alert: FIRE DETECTED", text_color="red")
-        self.log_event(f"Fire detected (confidence={confidence:.2f})")
+        self.alert_status_label.configure(
+            text="Alert: FIRE DETECTED",
+            text_color="red"
+        )
 
-    def deactivate_buzzer_clicked(self):
+    def clear_alert(self):
+        self.alert_active = False
+        self.alert_status_label.configure(
+            text="Alert: INACTIVE",
+            text_color="gray"
+        )
+
+    # -------------------------------------------------
+    # USER ACTIONS (EVENT EMISSION)
+    # -------------------------------------------------
+    def _deactivate_buzzer_clicked(self):
         if self.on_deactivate_buzzer:
             self.on_deactivate_buzzer()
 
-        self.alert_active = False
-        self.alert_status_label.configure(text="Alert: INACTIVE", text_color="gray")
-        self.log_event("Buzzer deactivated")
-
-    def stop_system(self):
+    def _stop_system_clicked(self):
         self.system_running = False
-        self.system_status_label.configure(text="System: STOPPED", text_color="red")
-        self.log_event("System stopped")
+        self.system_status_label.configure(
+            text="System: STOPPED",
+            text_color="red"
+        )
+
+        if self.on_stop_system:
+            self.on_stop_system()
 
     # -------------------------------------------------
-    # THREAD-SAFE
+    # LOAD LOGS
+    # -------------------------------------------------
+    def _load_existing_logs(self):
+        if not self.event_logger:
+            return
+
+        for ts, msg in self.event_logger.read_all(limit=100):
+            self.display_log(ts, msg)
+
+    # -------------------------------------------------
+    # THREAD-SAFE ENTRY POINTS
     # -------------------------------------------------
     def update_frame_from_thread(self, frame):
         self.after(0, lambda: self.update_video_frame(frame))
 
     def trigger_fire_from_thread(self, confidence):
         self.after(0, lambda: self.fire_detected(confidence))
-
-
-# -------------------------------------------------
-# STANDALONE UI TEST
-# -------------------------------------------------
-if __name__ == "__main__":
-    app = FireDetectionDashboard()
-    app.mainloop()

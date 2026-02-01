@@ -1,20 +1,22 @@
 import threading
-import cv2
 import time
+import cv2
 
 from video_input.video_stream import VideoInput
 from detection.fire_detector import FireDetector
 from ui.dashboard import FireDetectionDashboard
 from communication.esp32_client import ESP32Client
+from event_logging.event_logger import EventLogger
 
 
 class FireDetectionController:
     """
-    Orchestrates VideoInput, FireDetector, ESP32, and Dashboard
+    Orchestrates VideoInput, FireDetector, ESP32, Logger, and Dashboard
     """
 
-    def __init__(self, dashboard: FireDetectionDashboard):
+    def __init__(self, dashboard: FireDetectionDashboard, logger: EventLogger):
         self.dashboard = dashboard
+        self.logger = logger
 
         # Core modules
         self.video_input = None
@@ -28,9 +30,16 @@ class FireDetectionController:
         # Fire state (prevents alert spam)
         self.fire_active = False
 
-    # ---------------------------------------------
+    # -------------------------------------------------
+    # LOGGING (CENTRALIZED)
+    # -------------------------------------------------
+    def log(self, message: str):
+        timestamp, msg = self.logger.log(message)
+        self.dashboard.display_log(timestamp, msg)
+
+    # -------------------------------------------------
     # START STREAM
-    # ---------------------------------------------
+    # -------------------------------------------------
     def start_stream(self, source_type, source_value):
         self.stop_stream()
 
@@ -38,7 +47,7 @@ class FireDetectionController:
             self.video_input = VideoInput(source_type, source_value)
             self.video_input.start()
         except Exception as e:
-            self.dashboard.log_event(f" Stream error: {e}")
+            self.log(f"Stream error: {e}")
             return
 
         self.running = True
@@ -48,17 +57,17 @@ class FireDetectionController:
         )
         self.worker.start()
 
-        self.dashboard.log_event(f"▶ Stream started ({source_type})")
+        self.log(f"Stream started ({source_type})")
 
-    # ---------------------------------------------
-    # MAIN LOOP
-    # ---------------------------------------------
+    # -------------------------------------------------
+    # MAIN PROCESSING LOOP
+    # -------------------------------------------------
     def _processing_loop(self):
         while self.running:
             frame, timestamp = self.video_input.read()
 
             if frame is None:
-                self.dashboard.log_event("⚠ Video stream ended")
+                self.log("Video stream ended")
                 break
 
             fire, confidence, boxes = self.detector.process_frame(frame, timestamp)
@@ -73,13 +82,13 @@ class FireDetectionController:
                     2
                 )
 
-            # Fire event handling (ONE alert per event)
+            # Fire detected (single alert per event)
             if fire and not self.fire_active:
                 self.fire_active = True
 
                 cv2.putText(
                     frame,
-                    f" FIRE ({confidence:.2f})",
+                    f"FIRE ({confidence:.2f})",
                     (10, 30),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     1,
@@ -89,19 +98,22 @@ class FireDetectionController:
 
                 self.dashboard.trigger_fire_from_thread(confidence)
                 self.esp32_client.send_fire_alert(confidence)
+                self.log(f"Fire detected (confidence={confidence:.2f})")
 
-            # Reset fire state when fire disappears
+            # Fire cleared
             if not fire and self.fire_active:
                 self.fire_active = False
+                self.dashboard.clear_alert()
+                self.log("Fire condition cleared")
 
             self.dashboard.update_frame_from_thread(frame)
             time.sleep(0.03)
 
         self.stop_stream()
 
-    # ---------------------------------------------
+    # -------------------------------------------------
     # STOP STREAM
-    # ---------------------------------------------
+    # -------------------------------------------------
     def stop_stream(self):
         self.running = False
 
@@ -112,32 +124,41 @@ class FireDetectionController:
         self.detector.reset()
         self.fire_active = False
 
-    # ---------------------------------------------
+    # -------------------------------------------------
     # USER ACTIONS
-    # ---------------------------------------------
+    # -------------------------------------------------
     def deactivate_buzzer(self):
         self.detector.reset()
         self.fire_active = False
 
         self.esp32_client.deactivate_buzzer()
+        self.dashboard.clear_alert()
+        self.log("Buzzer deactivated by user")
 
     def shutdown(self):
         self.stop_stream()
         self.esp32_client.shutdown()
-        self.dashboard.log_event("System shutdown complete")
+        self.log("System shutdown complete")
+
+    # -------------------------------------------------
+    # CLEANUP
+    # -------------------------------------------------
+    def __del__(self):
+        self.shutdown()
 
 
-# ---------------------------------------------
+# -------------------------------------------------
 # APPLICATION ENTRY POINT
-# ---------------------------------------------
+# -------------------------------------------------
 def main():
-    dashboard = FireDetectionDashboard()
-    controller = FireDetectionController(dashboard)
+    logger = EventLogger("events_log.csv")
+    dashboard = FireDetectionDashboard(event_logger=logger)
+    controller = FireDetectionController(dashboard, logger)
 
-    # 🔗 Proper wiring (Dashboard → Controller)
+    # 🔗 UI → Controller wiring
     dashboard.on_start_stream = controller.start_stream
-    dashboard.stop_system = controller.shutdown
     dashboard.on_deactivate_buzzer = controller.deactivate_buzzer
+    dashboard.on_stop_system = controller.shutdown
 
     dashboard.mainloop()
 

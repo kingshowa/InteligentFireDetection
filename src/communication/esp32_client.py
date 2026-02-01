@@ -37,28 +37,3 @@ class ESP32Client:
     def shutdown(self):
         self.client.loop_stop()
         self.client.disconnect()
-
-
-# -------------------------------------------------
-# STANDALONE MQTT TEST
-# -------------------------------------------------
-# if __name__ == "__main__":
-#     esp = ESP32Client()
-#
-#     try:
-#         print("Sending FIRE alert in 3 seconds...")
-#         time.sleep(3)
-#
-#         # 🔥 Trigger fire alarm
-#         # esp.send_fire_alert(confidence=0.92)
-#
-#         # 🔔 Keep alarm active for 10 seconds
-#         # time.sleep(10)
-#
-#         # 🛑 Turn off alarm
-#         esp.deactivate_buzzer()
-#
-#     finally:
-#         time.sleep(1)
-#         esp.shutdown()
-#         print("MQTT test finished")
