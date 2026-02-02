@@ -56,7 +56,7 @@ void setup() {
     delay(500);
   }
 
-  client.subscribe("fire/system/alert");
+  client.subscribe("fire/alert");
 
   greenLed.turnON();
   redLed.turnOFF();

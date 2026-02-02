@@ -5,13 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb289260-61cb-4a21-85ae-e9f93d659943" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/event_logging/event_logger.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/device/fireDetectionAlert/fireDetectionAlert.ino" beforeDir="false" afterPath="$PROJECT_DIR$/device/fireDetectionAlert/fireDetectionAlert.ino" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/communication/esp32_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/communication/esp32_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/communication/pi_client.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/config.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/logging/event_logger.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/detection/fire_detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/detection/fire_detector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/events_log.csv" beforeDir="false" afterPath="$PROJECT_DIR$/src/events_log.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/ui/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ui/dashboard.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

@@ -15,7 +15,7 @@ class FireDetector:
     """
 
     def __init__(self,
-                 min_fire_duration=1.0,
+                 min_fire_duration=2.5,
                  min_fire_area=500,
                  confidence_threshold=0.6,
                  smoothing_window=10,

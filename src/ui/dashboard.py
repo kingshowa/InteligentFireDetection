@@ -59,7 +59,7 @@ class FireDetectionDashboard(ctk.CTk):
         self.main_container.pack(fill="both", expand=True, padx=15, pady=10)
 
         self.main_container.grid_columnconfigure(0, weight=4)
-        self.main_container.grid_columnconfigure(1, weight=3)
+        self.main_container.grid_columnconfigure(1, weight=4)
 
         self._build_left_panel()
         self._build_right_panel()
@@ -207,7 +207,7 @@ class FireDetectionDashboard(ctk.CTk):
     # -------------------------------------------------
     def update_video_frame(self, frame_bgr):
         frame_rgb = frame_bgr[:, :, ::-1]
-        img = Image.fromarray(frame_rgb).resize((620, 305))
+        img = Image.fromarray(frame_rgb).resize((640, 480))
         imgtk = ImageTk.PhotoImage(image=img)
 
         self.video_label.configure(image=imgtk, text="")

@@ -11,7 +11,7 @@ class ESP32Client:
     def __init__(self,
                  broker="broker.hivemq.com",
                  port=1883,
-                 topic_alert="fire/system/alert"):
+                 topic_alert="fire/alert"):
         self.broker = broker
         self.port = port
         self.topic_alert = topic_alert

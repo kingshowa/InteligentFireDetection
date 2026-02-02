@@ -1,0 +1,25 @@
+2026-02-01 23:27:01,Stream started (Camera)
+2026-02-01 23:27:12,Fire detected (confidence=0.61)
+2026-02-01 23:27:13,Fire condition cleared
+2026-02-01 23:27:19,Buzzer deactivated by user
+2026-02-01 23:27:25,Fire detected (confidence=1.00)
+2026-02-01 23:27:26,Fire condition cleared
+2026-02-01 23:27:35,Fire detected (confidence=1.00)
+2026-02-01 23:27:35,Fire condition cleared
+2026-02-01 23:27:51,Fire detected (confidence=1.00)
+2026-02-01 23:27:52,Fire condition cleared
+2026-02-01 23:28:02,Buzzer deactivated by user
+2026-02-01 23:28:06,Buzzer deactivated by user
+2026-02-01 23:28:12,Fire detected (confidence=0.94)
+2026-02-01 23:28:13,Fire condition cleared
+2026-02-01 23:28:17,Fire detected (confidence=0.94)
+2026-02-01 23:28:17,Fire condition cleared
+2026-02-01 23:28:19,Buzzer deactivated by user
+2026-02-01 23:28:34,Fire detected (confidence=1.00)
+2026-02-01 23:28:34,Fire condition cleared
+2026-02-02 01:27:42,Stream started (Camera)
+2026-02-02 01:28:08,Stream error: ERROR: The downloaded file is empty
+2026-02-02 01:28:54,Stream error: ERROR: The downloaded file is empty
+2026-02-02 01:30:14,Stream error: ERROR: The downloaded file is empty
+2026-02-02 01:31:27,Stream error: ERROR: The downloaded file is empty
+2026-02-02 01:32:49,Stream error: ERROR: The downloaded file is empty
