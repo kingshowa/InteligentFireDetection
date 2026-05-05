@@ -10,6 +10,12 @@ The software application analyzes video frames using color segmentation, motion 
 
 This project demonstrates practical integration between computer vision, desktop UI development, IoT communication, and embedded device control.
 
+## Screenshot
+
+![Intelligent Fire Detection System Dashboard](docs/img/fire-detection-dashboard.png)
+
+*Dashboard showing live video monitoring, fire detection status, event logs, and buzzer control.*
+
 ## Key Features
 
 - Real-time fire detection from video input
