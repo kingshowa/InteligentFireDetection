@@ -67,5 +67,3 @@ InteligentFireDetection/
 │   ├── events_log.csv
 │   └── main.py
 └── README.md
-
-<img width="1792" height="1024" alt="image" src="https://github.com/user-attachments/assets/7d9511c4-09d9-446d-921c-8b22e95a214c" />
