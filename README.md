@@ -12,7 +12,7 @@ This project demonstrates practical integration between computer vision, desktop
 
 ## Screenshot
 
-![Intelligent Fire Detection System Dashboard](docs/img/Screenshot 2026-05-05 110704.png)
+![Intelligent Fire Detection System Dashboard](docs/img/fire-detection-dashboard.png)
 
 *Dashboard showing live video monitoring, fire detection status, event logs, and buzzer control.*
 
