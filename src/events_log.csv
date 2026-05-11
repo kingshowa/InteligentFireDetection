@@ -89,3 +89,16 @@
 2026-02-02 15:38:18,Fire condition cleared
 2026-02-02 15:38:21,Fire detected (confidence=1.00)
 2026-02-02 15:38:46,Stream started (Camera)
+2026-05-05 11:02:20,Stream started (Camera)
+2026-05-05 11:05:40,Stream started (Local Video)
+2026-05-05 11:06:42,Fire detected (confidence=0.72)
+2026-05-05 11:06:44,Fire condition cleared
+2026-05-05 11:06:47,Fire detected (confidence=1.00)
+2026-05-05 11:06:53,Fire condition cleared
+2026-05-05 11:06:58,Fire detected (confidence=1.00)
+2026-05-05 11:07:09,Fire condition cleared
+2026-05-05 11:07:13,Fire detected (confidence=1.00)
+2026-05-05 11:07:16,Fire condition cleared
+2026-05-05 11:07:24,Fire detected (confidence=1.00)
+2026-05-05 11:07:33,Fire condition cleared
+2026-05-05 11:07:49,Video stream ended
